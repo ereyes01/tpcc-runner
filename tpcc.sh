@@ -25,7 +25,7 @@ echo "Loading test data"
 sudo docker run -it --rm --link tpcc-db:mysql gaishimo/tpcc-mysql tpcc_load tpcc root 'tpcc-pw' 50
 
 echo "Generating test container name..."
-NAME=$(date | md5sum)
+NAME="tpcc-run-"$(date | md5sum | awk '{print substr($1, 0, 4)}')
 
 echo "Starting the test..."
 sudo docker run -d --name $NAME --link tpcc-db:mysql gaishimo/tpcc-mysql tpcc_start -d tpcc -u root -p tpcc-pw -w 50 -c 10 -r $((20*60)) -l $((8*60*60))
