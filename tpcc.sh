@@ -13,22 +13,24 @@ echo "Starting MySQL container..."
 sudo docker run --name tpcc-db -e MYSQL_ROOT_PASSWORD=tpcc-pw -e MYSQL_DATABASE=tpcc -d -P mysql:8
 
 echo Waiting for DB to fully start up...
-while ! sudo docker exec -i tpcc-db /usr/bin/mysql -h localhost -P 3306 -uroot -ptpcc-pw -D tpcc <<<$(echo "show databases;") >/dev/null; do
+while ! sudo docker exec -i tpcc-db /usr/bin/mysql -h localhost -P 3306 -uroot -ptpcc-pw -D tpcc <<<$(echo "show databases;") >/dev/null 2>&1; do
+    printf '.'
     sleep 30
 done
+echo
 
 echo "Creating tables / adding indexes..."
-sudo docker run --rm gaishimo/tpcc-mysql sh -c 'cat create_table.sql add_fkey_idx.sql' | \
+sudo docker run --rm elreyes/tpcc-mysql sh -c 'cat create_table.sql add_fkey_idx.sql' | \
     sudo docker exec -i tpcc-db sh -c '/usr/bin/mysql -h localhost -P 3306 -uroot -ptpcc-pw -D tpcc'
 
 echo "Loading test data"
-sudo docker run -it --rm --link tpcc-db:mysql gaishimo/tpcc-mysql tpcc_load tpcc root 'tpcc-pw' 50
+sudo docker run -it --rm --link tpcc-db:mysql elreyes/tpcc-mysql sh -c 'tpcc_load -h $MYSQL_PORT_3306_TCP_ADDR -P $MYSQL_PORT_3306_TCP_PORT -d tpcc -u root -p "tpcc-pw" -w 1000'
 
 echo "Generating test container name..."
 NAME="tpcc-run-"$(date | md5sum | awk '{print substr($1, 0, 4)}')
 
-echo "Starting the test..."
-sudo docker run -d --name $NAME --link tpcc-db:mysql gaishimo/tpcc-mysql tpcc_start -d tpcc -u root -p tpcc-pw -w 50 -c 10 -r $((20*60)) -l $((8*60*60))
+echo "Starting the test (1000 warehouses, 32 connections, 1 minute ramp-up, watch for 3 hours)..."
+sudo docker run -d --name $NAME --link tpcc-db:mysql elreyes/tpcc-mysql sh -c 'tpcc_start -h $MYSQL_PORT_3306_TCP_ADDR -P $MYSQL_PORT_3306_TCP_PORT -d tpcc -u root -p "tpcc-pw" -w 1000 -c 32 -r 60 -l $((3*60*60))'
 
 cat <<EOF
 
