@@ -14,7 +14,11 @@ And MySQL is installed from the official MySQL community-doenloadable container:
 `curl -sSL https://get.docker.com/ | sh`
 
 2. Run the script in this repository:
-`curl -sSL https://raw.githubusercontent.com/ereyes01/tpcc-runner/master/tpcc.sh | sh`
+```
+wget https://raw.githubusercontent.com/ereyes01/tpcc-runner/master/tpcc.sh
+chmod +x ./tpcc.sh
+./tpcc.sh
+```
 
 The database and the TPC-C data will be loaded, which can take a while. When the test is started, the scrip will terminate and its output will tell you how to monitor the test and view the results.
 
