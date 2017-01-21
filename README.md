@@ -24,7 +24,7 @@ The database and the TPC-C data will be loaded, which can take a while. When the
 
 The TPC-C test is executed with the following parameters:
 
-- Warehouses: 50
-- Connections: 10
-- Ramp-up time: 20 minutes
-- Test time: 8 hours
+- Warehouses: 1000
+- Connections: 32
+- Ramp-up time: 1 minute
+- Test time: 3 hours
